@@ -1,0 +1,50 @@
+---
+title: "blank meta"
+author: "HS"
+date: "2019/10/11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load R}
+library(meta)
+```
+> 导入自带数据集Olkin95
+
+> olkin95是急性心肌梗塞后溶解血栓剂治疗的一个数据集，共有author,year, event.e, n.e, event.c, n.c六个变量，分别代表纳入文献的第一作者，发表年份，实验组的有效患者数，实验组的总人数，对照组的有效患者数和对照组的总人数。
+
+```{r import data, message=FALSE, warning=FALSE}
+olkin95 <- read.csv("1 olkin95.csv")# 文件必须在该RMD文件同一目录，即工作目录，否则必须写完整路径。
+head(olkin95) # "head()" is enough, no need for "summary()" or "olkin95"
+```
+
+> metabin命令能够计算两分类资料的RR、OR、RD和AS(反正弦)差异值，并可用MH，方差倒数和Peto方法联合估计效应值。
+
+```{r metabin, message=FALSE, warning=FALSE}
+meta1 <- metabin(event.e, n.e, event.c, n.c, data=olkin95,  subset=c(7:16), sm="OR", label.e = "Case", studlab=paste(author, year), comb.random = F)
+summary(meta1)#汇报具体结果
+```
+- jpeg("forest.jpeg", height = 650, width = 500, res = 80) 
+- par(mar=c(4,2,2,2)) # to control the margin of the canvas,(down,left,up,right)
+- 加上这2句是可以直接出图，但图有阴影，不漂亮
+
+```{r forest& funnel, message=FALSE, warning=FALSE}
+forest(meta1, leftcols = "studlab", comb.fixed = F, comb.random = T, test.overall = T, prediction = T, xlim=c(0.2, 3), xlab = "xlab定义x轴标签",  ff.fixed="plain", fs.axis=6, digits = 3) 
+```
+
+```{r meta2, message=FALSE, warning=FALSE}
+meta2 <- update(meta1, byvar = ifelse(year < 1987, "Before 1987", "1987 and later"), print.byvar = FALSE)
+forest(meta2, leftcols = "studlab", sortvar = -TE, comb.random = FALSE, xlim = c(0.1, 5)) 
+```
+
+```{r plots, message=FALSE, warning=FALSE}
+funnel(meta1)
+forest(metainf(meta1)) # 敏感性分析直接绘图即可，没必要显示结果。
+```
+
+```{r metabias, message=FALSE, warning=FALSE}
+metabias(meta1,method.bias="linreg") # Linear regression test of funnel plot asymmetry
+```

@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(meta)
 ```
 > 导入自带数据集Olkin95
+改一下试试
 
 > olkin95是急性心肌梗塞后溶解血栓剂治疗的一个数据集，共有author,year, event.e, n.e, event.c, n.c六个变量，分别代表纳入文献的第一作者，发表年份，实验组的有效患者数，实验组的总人数，对照组的有效患者数和对照组的总人数。
 
